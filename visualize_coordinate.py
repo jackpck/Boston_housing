@@ -27,14 +27,6 @@ gmap = gmplot.GoogleMapPlotter(df_prop.LATITUDE.iloc[0],
 with open('./data/key/' + 'google_apikey.txt') as FILE:
     gmap.apikey = FILE.readline().rstrip()
 
-#x_coor, y_coor = zip(*[(df_poi.lat.iloc[i],df_poi.lon.iloc[i]) for i in range(len(df_poi))])
-
-#gis = GIS(profile='dd')
-#pdx_map = gis.map('Portland, OR')
-#pdx_map.basemap='gray'
-#pdx_map
-#plt.show()
-
 gmap.scatter(df_poi.lat.values, df_poi.lon.values, '#3B0B39', size=40, marker=False)
 gmap.draw("./maps_html/%s_map.html"%'school')
 
