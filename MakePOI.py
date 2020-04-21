@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-property_type = 'condo'
+property_type = 'single_family_residential'
 poi_list = ['convenience','supermarket','park','school','station','stop_position']
 radius = 0.5
 
