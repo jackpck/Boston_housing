@@ -13,7 +13,8 @@ property_type = 'townhouse'
 df_X = pd.read_csv('./data/processed/' + 'Boston_%s_feature_matrix.csv'%property_type,index_col=0)
 
 Y = df_X.pop('SOLD PRICE').values
-X = df_X.pop('LIST PRICE').values
+df_sqft = df_X.pop('SQUARE FEET')
+X = ((df_X.pop('EST $ TREND')/df_sqft - df_X.pop('CHANGE IN $/SQUARE FEET'))*df_sqft).values
 feature_names = df_X.columns
 print(feature_names)
 
