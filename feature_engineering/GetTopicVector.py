@@ -7,7 +7,7 @@ from sklearn.decomposition import NMF
 
 
 property_type = 'condo'
-df = pd.read_csv('./data/' + 'Boston_%s_remarks.csv'%property_type,index_col=0)
+df = pd.read_csv('./data/textdata/' + 'Boston_%s_remarks.csv'%property_type,index_col=0)
 
 print(df['REMARKS'].iloc[0])
 

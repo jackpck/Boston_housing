@@ -1,8 +1,11 @@
 data
 maps_html
 git
+figures
+pickled_models
 
 .idea
 .ipynb_checkpoints
+.DS_Store
 __pycache__
 
