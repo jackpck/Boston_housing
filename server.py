@@ -31,7 +31,7 @@ GoogleMaps(app)
 #def home_page():
 #    return render_template(html_script)  # render a template
 
-@app.route('/output')
+@app.route('/')
 def recommendation_output():
 #
    	# Pull input
@@ -49,13 +49,16 @@ def recommendation_output():
 
     # creating a map in the view
     print('creating a map in the view')
-    print(property_latitude,property_longitude)
+    #print(property_latitude,property_longitude)
 
     gmap = Map(
         identifier="view-side",
-        lat=property_latitude,
-        lng=property_longitude,
-        markers=[(property_latitude, property_longitude)]
+        #lat=property_latitude,
+        #lng=property_longitude,
+        #markers=[(property_latitude, property_longitude)]
+        lat=37.4419,
+        lng=-122.1419,
+        markers=[(37.4419, -122.1419)]
     )
 
     return render_template(html_script, gmap=gmap)
