@@ -41,6 +41,13 @@
   </head>
   <body>
 
+    <form action="/" method="POST" id="user_input">
+      <label for="user_input">Address</label>
+      <input type="text" id="user_input" name='address' size="10" placeholder="e.g. 25 Brighton St"><br>
+    </form>
+
+    <button type="submit" class="btn green" form="user_input"><b>Get map</b></button>
+
     {{ gmap.js }}
     {{ gmap.html }}
   </body>

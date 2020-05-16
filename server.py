@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect
 import pandas as pd
 import numpy as np
 import pygal
@@ -31,37 +31,45 @@ GoogleMaps(app)
 #def home_page():
 #    return render_template(html_script)  # render a template
 
-@app.route('/')
-def recommendation_output():
-#
-   	# Pull input
-    #address_input = request.args.get('address') + ', Boston, MA'
-    #property_type = request.args.get('property type')
+lat_default = 42.36012
+lng_default = -71.0589
 
-    #property_latitude,property_longitude = get_coor(address_input)
+@app.route('/',methods=["GET","POST"])
+def enter_address():
+    if request.method == 'POST':
+        address_input = request.values.get('address') + ', Boston, MA'
 
-# Case if empty
-    #if address_input == "":
-    #        print('address input is empty')
-    #        return render_template(html_script,
-    #                               my_form_result="Empty")
-    #else:
+        print(address_input)
+        property_latitude,property_longitude = get_coor(address_input)
 
-    # creating a map in the view
-    print('creating a map in the view')
-    #print(property_latitude,property_longitude)
+        #if address_input == "":
+        #        print('address input is empty')
+        #        return render_template(html_script,
+        #                               my_form_result="Empty")
+        #else:
 
-    gmap = Map(
-        identifier="view-side",
-        #lat=property_latitude,
-        #lng=property_longitude,
-        #markers=[(property_latitude, property_longitude)]
-        lat=37.4419,
-        lng=-122.1419,
-        markers=[(37.4419, -122.1419)]
-    )
+        print('creating a map in the view')
+        print(property_latitude,property_longitude)
 
-    return render_template(html_script, gmap=gmap)
+        gmap = Map(
+            identifier="view-side",
+            lat=property_latitude,
+            lng=property_longitude,
+            markers=[(property_latitude, property_longitude)]
+        )
+
+        return render_template(html_script, gmap=gmap)
+
+    else:
+        gmap = Map(
+            identifier="view-side",
+            lat=lat_default,
+            lng=lng_default,
+            markers=[(lat_default,lng_default)]
+        )
+
+        return render_template(html_script, gmap=gmap)
+
 
 
 # start the server with the 'run()' method
