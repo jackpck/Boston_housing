@@ -36,20 +36,41 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Foundation | Welcome</title>
+    <title>Boston housing</title>
       <link rel="stylesheet" href="https://dhbhdrzi4tiry.cloudfront.net/cdn/sites/foundation.min.css">
   </head>
   <body>
 
+  <div class="row">
+  <div class="column">
     <form action="/" method="POST" id="user_input">
       <label for="user_input">Address</label>
-      <input type="text" id="user_input" name='address' size="10" placeholder="e.g. 25 Brighton St"><br>
+      <input type="text" id="user_input" name='address' size="10"
+             style="width: 300px;" placeholder="e.g. 25 Brighton St"><br>
+
+      <label for="user_input">Property type</label>
+      <select name="property type" style="width: 300px;">
+        <option value="Townhouse">Townhouse</option>
+        <option value="Single Family Residential">Single Family Residential</option>
+        <option value="Condo/Co-op">Condo/Co-op</option>
+      </select>
+
+      <br>
     </form>
 
     <button type="submit" class="btn green" form="user_input"><b>Get map</b></button>
+    <br>
+
+    </div>
+
+    <div class="column">
 
     {{ gmap.js }}
     {{ gmap.html }}
+
+    </div>
+    </div> <!-- END ROW -->
+
   </body>
 </html>
 

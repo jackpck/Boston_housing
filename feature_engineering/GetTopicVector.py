@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../functions/')
 import pandas as pd
 import numpy as np
 from nlp_functions import preprocess,plot_top_10_words_from_count,print_topics
@@ -7,7 +9,7 @@ from sklearn.decomposition import NMF
 
 
 property_type = 'condo'
-df = pd.read_csv('./data/textdata/' + 'Boston_%s_remarks.csv'%property_type,index_col=0)
+df = pd.read_csv('../data/textdata/' + 'Boston_%s_remarks.csv'%property_type,index_col=0)
 
 print(df['REMARKS'].iloc[0])
 
@@ -21,6 +23,7 @@ tfidf_vectorizer = TfidfVectorizer(stop_words='english',
 
 corpus_tfidf = tfidf_vectorizer.fit_transform(df_processed.astype(str))
 
+print(corpus_tfidf)
 n_topic = 10
 
 nmf = NMF(n_components=n_topic, random_state=101).fit(corpus_tfidf)
@@ -34,7 +37,6 @@ words = np.array(tfidf_vectorizer.get_feature_names())
 topic_word_vectors = []
 for i in range(n_topic):
     topic_word_vectors.append(words[nmf.components_[i].argsort()[:-n_top_words - 1:-1]])
-
 
 def topic_similarity(remark):
     return ' '.join('%.2f'%(len(set(remark.split(' ')).intersection(set(topic_word_vectors[i]))) / n_top_words)
