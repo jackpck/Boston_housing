@@ -112,8 +112,33 @@ class Model:
         return {poi:len(self.get_poi(address, poi)) for poi in Model.POI_KEY}
 
 
+    def to_input_array(self,year,sqft,bed,bath,
+                       lot_size,has_lot,address,
+                       property_type,remarks):
+
+        N_poi = M.count_poi(address)
+
+        x_input = np.empty(14,dtype=object)
+        x_input[0] = year
+        x_input[1] = sqft
+        x_input[2] = bed
+        x_input[3] = bath
+        x_input[4] = lot_size
+        x_input[5] = remarks
+        x_input[6] = N_poi['convenience']
+        x_input[7] = N_poi['supermarket']
+        x_input[8] = N_poi['park']
+        x_input[9] = N_poi['school']
+        x_input[10] = N_poi['station']
+        x_input[11] = N_poi['stop_position']
+        x_input[12] = property_type
+        x_input[13] = has_lot
+
+        return x_input.reshape(1,-1)
+
+
     def predict(self,x):
-        return 10**self.model.predict(x) # model is trained with log(y)
+        return 10**self.model.predict(x)[0] # model is trained with log(y)
 
 
 if __name__ == '__main__':
@@ -124,10 +149,11 @@ if __name__ == '__main__':
     bed = 3
     bath = 2
     lot_size = 100
-    has_lot = True
+    has_lot = 1
     address = '25 Brighton Ave, Boston, MA'
     property_type = 'condo'
     remarks = 'This condo has a beautiful renovated kitchen. New AC as well.'
+    remarks = 'This condo is average. Nothing special. Kinda boring.'
 
 
 
@@ -135,12 +161,7 @@ if __name__ == '__main__':
     path_to_model = '../pickled_models/RF_all_property_sold_price.pkl'
     M.load_from_pickle(path_to_model)
 
-    X_input = [year,sqft,bed,bath,lot_size,preprocess(remarks)]
-    N_poi = M.count_poi(address)
-    X_input += [N_poi['convenience'],N_poi['supermarket'],N_poi['park'],
-                N_poi['school'],N_poi['station'],N_poi['stop_position']]
-    X_input += [property_type,has_lot]
-
-    X_input = np.array(X_input).reshape(1,-1)
-
+    X_input = M.to_input_array(year,sqft,bed,bath,
+                               lot_size,has_lot,address,
+                               property_type,remarks)
     print('estimated sold price: ',M.predict(X_input))

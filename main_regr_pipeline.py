@@ -26,7 +26,7 @@ property_types = ['single_family_residential','condo','townhouse']
 df = pd.DataFrame([])
 for property_type in property_types:
     df_temp = pd.read_csv('./data/raw_joined/' + 'Boston_%s_joined_dataframe.csv'%property_type,index_col=0)
-    df_temp['PROPERTY TYPE'] = 'single_family_residential'
+    df_temp['PROPERTY TYPE'] = property_type
     df = pd.concat([df,df_temp])
 
 df = df.sort_values('SOLD DATE')
@@ -86,9 +86,16 @@ preprocess = ColumnTransformer(transformers=[
                             ])
 
 p_tot = Pipeline([('preprocess',preprocess),
+                  #('RF',RandomForestRegressor(n_jobs=-1))])
                   ('Switcher',RegrSwitcher())])
 
 #print(p_tot.get_params().keys())
+
+#params = {'preprocess__p_text__TFIDF__ngram_range':[(1,1)],
+#          'preprocess__p_text__tSVD__n_components':[8,9,10],
+#          'RF__n_estimators':[60,70],
+#          'RF__max_depth':[8,9]
+#          }
 
 params = [{'Switcher__estimator':[RandomForestRegressor()],
            'preprocess__p_text__TFIDF__ngram_range':[(1,1)],
@@ -120,11 +127,12 @@ regr.fit(Xtrain,Ytrain)
 print(regr.best_params_)
 print(regr.best_score_)
 
-Ypred = regr.predict(Xtest)
 
-with open('./pickled_models/RF_all_property_time_to_sell.pkl', 'wb') as f:
+with open('./pickled_models/RF_all_property_sold_price.pkl', 'wb') as f:
     pickle.dump(regr, f)
 
+
+Ypred = regr.predict(Xtest)
 
 print('PRICE PREDICTION')
 print('r2 score: ',r2_score(Ytest,Ypred))
