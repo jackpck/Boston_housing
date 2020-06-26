@@ -11,6 +11,7 @@ from geopy.geocoders import Nominatim
 import pickle
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestRegressor
+import numpy as np
 
 class RegrSwitcher(BaseEstimator):
     def __init__(self,estimator=RandomForestRegressor()):
@@ -116,7 +117,7 @@ class Model:
                        lot_size,has_lot,address,
                        property_type,remarks):
 
-        N_poi = M.count_poi(address)
+        N_poi = self.count_poi(address)
 
         x_input = np.empty(14,dtype=object)
         x_input[0] = year
@@ -124,7 +125,7 @@ class Model:
         x_input[2] = bed
         x_input[3] = bath
         x_input[4] = lot_size
-        x_input[5] = remarks
+        x_input[5] = preprocess(remarks)
         x_input[6] = N_poi['convenience']
         x_input[7] = N_poi['supermarket']
         x_input[8] = N_poi['park']
