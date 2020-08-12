@@ -3,6 +3,7 @@ maps_html
 git
 figures
 pickled_models
+env
 
 .idea
 .ipynb_checkpoints
