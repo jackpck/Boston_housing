@@ -15,4 +15,5 @@ From my previous project `time2sell`, I have concluded that it was very difficul
 ## Notebook
 I encourage the reader to take a look at the notebooks in `./notebook` as they showed how my logic were formed and my understanding of the data through the exploratory data analysis (EDA), and how that understanding led to the choice of my model. I suggest reader to look at `eda.ipynb` for general EDA such as price trends in different neighborhoods, price distribution of different property types etc.; `lstm_eda.ipynb` for trends in daily average selling price and the use of LSTM; and `nlp.ipynb` for understanding what topics NMF found from the remarks.
 
-
+## Web app
+I have also created a web app `server.py` which allows user to estimate the house price based on the specifics of the house, the address and a brief remark of the house.

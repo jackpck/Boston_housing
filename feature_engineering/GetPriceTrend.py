@@ -1,7 +1,10 @@
+'''
+Get the average $/sqft of houses sold right before each house is listed.
+'''
+
 import pandas as pd
 import numpy as np
 import sys
-import re
 sys.path.append('~/PycharmProjects/Boston_housing/')
 
 def outlier(x):
@@ -10,30 +13,39 @@ def outlier(x):
 property_type = 'single_family_residential'
 PROPERTY_TYPE = 'Single Family Residential'
 
-df = pd.read_csv('./data/raw/' + 'redfin_2020-01-19-08-17-26.csv')
-df = df[['PROPERTY TYPE','SOLD DATE','PRICE','$/SQUARE FEET']]
+df = pd.read_csv('../data/raw/' + 'redfin_2020-01-19-08-17-26.csv')
 df = df[df['PROPERTY TYPE'] == PROPERTY_TYPE]
+df.pop('PRICE')
+df.pop('SOLD DATE')
+# only transaction file contain list date
+df_transaction = pd.read_csv('../data/processed/' + 'Boston_%s_transaction.csv'%property_type,index_col=0)
+df = df.join(df_transaction,how='inner')
+
+df = df[['PROPERTY TYPE','LIST DATE','SOLD DATE','SOLD PRICE','$/SQUARE FEET']]
+df['LIST DATE'] = pd.to_datetime(df['LIST DATE'])
+df = df.sort_values('LIST DATE')
 df = df.dropna()
 
-price_outlier = outlier(df['PRICE'])
-df = df[df['PRICE'] < price_outlier]
-df['SOLD DATETIME'] = pd.to_datetime(df['SOLD DATE'])
-df = df.sort_values('SOLD DATETIME')
+price_outlier = outlier(df['SOLD PRICE'])
+df = df[df['SOLD PRICE'] < price_outlier]
 
-# predict $/sqft on the next house by the average $/sqft of all properties sold in the last record date
-df_average_price = df[['SOLD DATE','$/SQUARE FEET']].groupby('SOLD DATE').mean()
-df_average_price['SOLD DATETIME'] = pd.to_datetime(df_average_price.index)
-df_average_price = df_average_price.sort_values('SOLD DATETIME')
+# $ per sqft of the last sold house
+df_last_ppsqft = df[['SOLD DATE','$/SQUARE FEET']].groupby('SOLD DATE').mean()
+df_last_ppsqft.columns = ['EST $/SQUARE FEET']
+# house listed today is using average $/sqft from the last sold house
+df_last_ppsqft = df_last_ppsqft.shift(1)
+# predict $/sqft sold on sold date from the list date
+df_ppsqft = df[['LIST DATE','$/SQUARE FEET']].set_index('LIST DATE')
 
-df_est_price = df_average_price.shift(1)
+# $/sqft = price sold on sold date
+# Est $/sqft = price of last house sold before the list date of the current house
+# index = list date (date when estimation is made)
+df_joined = df_ppsqft.join(df_last_ppsqft, how='left') # left join: always keep each house listed
+df_joined = df_joined.fillna(method='ffill') # use the last average sold price
+df_joined.index = df.index
+df_joined.pop('$/SQUARE FEET')
 
-dict_date_price = {df_est_price.index[i]:
-              df_est_price['$/SQUARE FEET'].iloc[i] for i in range(len(df_est_price))}
-
-df_est_price_per_sqft = df['SOLD DATE'].apply(lambda x: dict_date_price[x])
-
-df_est_price_per_sqft.name = 'EST $/SQUARE FEET'
-df_est_price_per_sqft.to_frame().to_csv('./data/processed/' + 'Boston_%s_price_trend.csv'%property_type)
+df_joined.to_csv('../data/processed/' + 'Boston_%s_price_trend.csv'%property_type)
 
 
 

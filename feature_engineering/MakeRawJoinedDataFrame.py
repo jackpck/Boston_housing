@@ -18,14 +18,13 @@ def upper_outlier(x):
 def lower_outlier(x):
     return  np.quantile(x,0.25) - 1.5*(np.quantile(x,0.75)-np.quantile(x,0.25))
 
-property_type = 'townhouse'
+property_type = 'single_family_residential'
 
 df_topic = pd.read_csv('../data/textdata/' + 'Boston_%s_remarks.csv'%property_type,index_col=0)
 df_prop = pd.read_csv('../data/raw/' + 'redfin_2020-01-19-08-17-26.csv')
 df_history = pd.read_csv('../data/processed/' + 'Boston_%s_transaction.csv'%property_type,index_col=0)
 df_poi = pd.read_csv('../data/processed/' + 'Boston_%s_poi.csv'%property_type,index_col=0)
 df_trend = pd.read_csv('../data/processed/' + 'Boston_%s_price_trend.csv'%property_type,index_col=0)
-#df_lstm = pd.read_csv('../data/processed/' + 'Boston_%s_lstm.csv'%property_type,index_col=0)
 
 df_prop = df_prop[['YEAR BUILT','SQUARE FEET','$/SQUARE FEET','BEDS','BATHS','LOT SIZE','HOA/MONTH']]
 
@@ -38,8 +37,6 @@ df = df_prop.join(df_topic, how = 'inner')
 df = df.join(df_history, how = 'inner')
 df = df.join(df_poi, how = 'inner')
 df = df.join(df_trend, how = 'inner')
-#df = df.join(df_lstm, how = 'inner',rsuffix='_LSTM')
-
 
 df['SOLD DATE'] = pd.to_datetime(df['SOLD DATE'])
 df['LIST DATE'] = pd.to_datetime(df['LIST DATE'])
@@ -49,9 +46,6 @@ print(df.isnull().sum())
 df = df.dropna()
 print(df.isnull().sum())
 
-df['EST $ TREND'] = df['EST $/SQUARE FEET']*df['SQUARE FEET']
-#df['EST $ LSTM'] = df['EST $/SQUARE FEET_LSTM']*df['SQUARE FEET']
-
-df = df.sort_values('SOLD DATE')
+df = df.sort_values('LIST DATE')
 
 df.to_csv('../data/raw_joined/' + 'Boston_%s_joined_dataframe.csv'%property_type)

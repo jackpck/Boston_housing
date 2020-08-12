@@ -24,6 +24,9 @@ class RegrSwitcher(BaseEstimator):
     def predict(self,x,y=None):
         return self.estimator.predict(x)
 
+    def predict_proba(self,x,y=None):
+        return self.estimator.predict_proba(x)
+
     def score(self,x,y):
         return self.estimator.score(x,y)
 
@@ -68,6 +71,14 @@ class Model:
             sqrt((sin(lat1 - lat2) / 2) ** 2 + cos(lat1) * cos(lat2) * (sin(lon1 - lon2) / 2) ** 2))
 
 
+    def delta_lat(self):
+        return Model.RADIUS/Model.EARTH_RADIUS
+
+
+    def delta_lon(self,lat):
+        return np.abs(2*asin(sin(Model.RADIUS/(2*Model.EARTH_RADIUS))/cos(lat)))
+
+
     def get_poi_within_radius(self,lat1,lat2,long1,long2,r):
         n = len(lat2)
         poi_coor = []
@@ -88,17 +99,21 @@ class Model:
 
 
     def get_poi(self, address, poi):
-
         lat_prop, long_prop = self.get_coor(address)
+        south_boundary = lat_prop - self.delta_lat()
+        west_boundary = long_prop - self.delta_lon(lat_prop)
+        north_boundary = lat_prop + self.delta_lat()
+        east_boundary = long_prop + self.delta_lon(lat_prop)
+
         overpass_query = """
         [out:json]; 
         (node['{0}'='{1}']({2},{3},{4},{5}););
          out center;
         """.format(Model.POI_KEY[poi],poi,
-                   Model.BOSTON_S,
-                   Model.BOSTON_W,
-                   Model.BOSTON_N,
-                   Model.BOSTON_E)
+                   south_boundary,
+                   west_boundary,
+                   north_boundary,
+                   east_boundary)
         response = requests.get(Model.OVERPASS_URL,
                                 params={'data': overpass_query})
         df = pd.DataFrame.from_dict(json_normalize(response.json()))
