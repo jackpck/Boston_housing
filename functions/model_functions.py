@@ -4,7 +4,9 @@ sys.path.append('../')
 from nlp_functions import preprocess
 import requests
 import json
+import csv
 import pandas as pd
+from datetime import datetime
 from pandas.io.json import json_normalize
 from math import sqrt,radians,cos,sin,asin
 from geopy.geocoders import Nominatim
@@ -12,6 +14,17 @@ import pickle
 from sklearn.base import BaseEstimator
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
+
+
+def get_latest_data_via_API():
+    '''
+    Does not work. Need to somehow bypass usage analysis algorithms
+    '''
+    CSV_URL = "https://www.redfin.com/stingray/api/gis-csv?al=1&market=boston&min_stories=1&num_homes=100&ord=redfin-recommended-asc&page_number=1&region_id=1826"+\
+              "&region_type=6&sold_within_days=90&status=9&uipt=1,2,3,4,5,6&v=8"
+    response = requests.get(CSV_URL)
+    return response.content
+
 
 class RegrSwitcher(BaseEstimator):
     def __init__(self,estimator=RandomForestRegressor()):
@@ -93,7 +106,7 @@ class Model:
         Get latitude and longitude of an address
         e.g. 25 Brighton Street, Boston, MA
         '''
-        geolocator = Nominatim(timeout=3)
+        geolocator = Nominatim(timeout=3,user_agent='boston_housing')
         location = geolocator.geocode(address_str)
         return location.latitude, location.longitude
 
@@ -130,11 +143,11 @@ class Model:
 
     def to_input_array(self,year,sqft,bed,bath,
                        lot_size,has_lot,address,
-                       property_type,remarks):
+                       property_type,remarks,est_ppsqft):
 
         N_poi = self.count_poi(address)
 
-        x_input = np.empty(14,dtype=object)
+        x_input = np.empty(16,dtype=object)
         x_input[0] = year
         x_input[1] = sqft
         x_input[2] = bed
@@ -147,8 +160,10 @@ class Model:
         x_input[9] = N_poi['school']
         x_input[10] = N_poi['station']
         x_input[11] = N_poi['stop_position']
-        x_input[12] = property_type
-        x_input[13] = has_lot
+        x_input[12] = est_ppsqft
+        x_input[13] = property_type
+        x_input[14] = datetime.today().month
+        x_input[15] = has_lot
 
         return x_input.reshape(1,-1)
 
@@ -170,6 +185,7 @@ if __name__ == '__main__':
     property_type = 'condo'
     remarks = 'This condo has a beautiful renovated kitchen. New AC as well.'
     remarks = 'This condo is average. Nothing special. Kinda boring.'
+    est_ppsqft = 400 # user input est $/sqft. Try to automate this part.
 
 
 
@@ -179,5 +195,5 @@ if __name__ == '__main__':
 
     X_input = M.to_input_array(year,sqft,bed,bath,
                                lot_size,has_lot,address,
-                               property_type,remarks)
+                               property_type,remarks,est_ppsqft)
     print('estimated sold price: ',M.predict(X_input))
