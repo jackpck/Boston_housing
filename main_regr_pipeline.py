@@ -58,11 +58,12 @@ premium_sign = np.sign(premium)
 # PREDICT SOLD PRICE #
 ######################
 
-Y = price_per_sqft
+Y = sold_price
 Y = np.log10(Y)
 features = df.columns.tolist()
 print(features)
 X = df.values
+print(X[0])
 
 numerical_features = ['SQUARE FEET','YEAR BUILT','EST $/SQUARE FEET'] # require BoxCox transformation
 text_features = ['REMARKS'] # require vectorization
@@ -121,8 +122,8 @@ print(regr.best_params_)
 print(regr.best_score_)
 
 
-#with open('./pickled_models/RF_all_property_premium.pkl', 'wb') as f:
-#    pickle.dump(regr, f)
+with open('./pickled_models/RF_all_property_sold_price.pkl', 'wb') as f:
+    pickle.dump(regr, f)
 
 
 Ypred = regr.predict(Xtest)

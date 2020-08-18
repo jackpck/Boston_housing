@@ -45,6 +45,7 @@ def enter_address():
         baths = int(request.values.get('baths'))
         lot_size = float(request.values.get('lot_size'))
         property_type = request.values.get('property_type')
+        ppsqft = request.values.get('ppsqft')
         remark = request.values.get('remark')
 
         if lot_size > 0:
@@ -54,7 +55,8 @@ def enter_address():
 
         property_latitude,property_longitude = Agent.get_coor(address)
         X_input = Agent.to_input_array(year_built, sqft, beds, baths, lot_size,
-                                       has_lot, address, property_type, remark)
+                                       has_lot, address, property_type, remark,
+                                       ppsqft)
         sold_price_pred = Agent.predict(X_input)
 
         gmap = Map(

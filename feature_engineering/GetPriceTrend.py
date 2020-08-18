@@ -10,8 +10,8 @@ sys.path.append('~/PycharmProjects/Boston_housing/')
 def outlier(x):
     return 1.5*(np.quantile(x,0.75)-np.quantile(x,0.25)) + np.quantile(x,0.75)
 
-property_type = 'single_family_residential'
-PROPERTY_TYPE = 'Single Family Residential'
+property_type = 'condo'
+PROPERTY_TYPE = 'Condo/Co-op'
 
 df = pd.read_csv('../data/raw/' + 'redfin_2020-01-19-08-17-26.csv')
 df = df[df['PROPERTY TYPE'] == PROPERTY_TYPE]
@@ -23,14 +23,15 @@ df = df.join(df_transaction,how='inner')
 
 df = df[['PROPERTY TYPE','LIST DATE','SOLD DATE','SOLD PRICE','$/SQUARE FEET']]
 df['LIST DATE'] = pd.to_datetime(df['LIST DATE'])
+df['SOLD DATE'] = pd.to_datetime(df['SOLD DATE'])
 df = df.sort_values('LIST DATE')
 df = df.dropna()
 
-price_outlier = outlier(df['SOLD PRICE'])
-df = df[df['SOLD PRICE'] < price_outlier]
+#price_outlier = outlier(df['SOLD PRICE'])
+#df = df[df['SOLD PRICE'] < price_outlier]
 
 # $ per sqft of the last sold house
-df_last_ppsqft = df[['SOLD DATE','$/SQUARE FEET']].groupby('SOLD DATE').mean()
+df_last_ppsqft = df[['SOLD DATE','$/SQUARE FEET']].groupby('SOLD DATE').median()
 df_last_ppsqft.columns = ['EST $/SQUARE FEET']
 # house listed today is using average $/sqft from the last sold house
 df_last_ppsqft = df_last_ppsqft.shift(1)

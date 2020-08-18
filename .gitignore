@@ -2,7 +2,6 @@ data
 maps_html
 git
 figures
-pickled_models
 env
 
 .idea
