@@ -17,3 +17,5 @@ I encourage the reader to take a look at the notebooks in `./notebook` as they s
 
 ## Web app
 I have also created a web app `server.py` which allows user to estimate the house price based on the specifics of the house, the address and a brief remark of the house.
+![Screenshot of webapp]
+(./screenshots/Screenshot 2020-09-15 095349.png)

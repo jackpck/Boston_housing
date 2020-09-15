@@ -26,6 +26,29 @@ def get_latest_data_via_API():
     return response.content
 
 
+def load_data():
+    property_types = ['single_family_residential', 'condo', 'townhouse']
+
+    df = pd.DataFrame([])
+    for property_type in property_types:
+        df_temp = pd.read_csv('./data/raw_joined/' + 'Boston_%s_joined_dataframe.csv' % property_type, index_col=0)
+        df_temp['PROPERTY TYPE'] = property_type
+        df = pd.concat([df, df_temp])
+    df = df.sort_values('LIST DATE')
+
+    df['DAYS ON MKT'] = df['DAYS ON MKT'].apply(lambda x: x if x > 0 else np.nan)
+    df['PREMIUM'] = (df['SOLD PRICE'] - df['LIST PRICE']) / df['LIST PRICE']
+    df['PREMIUM'] = df['PREMIUM'].apply(lambda x: x if np.abs(x) < 2 else np.nan)
+    df['LIST MONTH'] = pd.to_datetime(df['LIST DATE']).apply(lambda x: x.month)
+    df['HAS LOT'] = df['LOT SIZE'].apply(lambda x: 1 if x > 0 else 0)
+    df.pop('LIST DATE')
+    df.pop('SOLD DATE')
+    df.pop('HOA/MONTH')
+    df = df.dropna()
+
+    return df
+
+
 class RegrSwitcher(BaseEstimator):
     def __init__(self,estimator=RandomForestRegressor()):
         self.estimator = estimator

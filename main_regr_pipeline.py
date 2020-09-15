@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import warnings
 
-from model_functions import RegrSwitcher
+from model_functions import RegrSwitcher, load_data
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer,TransformedTargetRegressor
 from sklearn.preprocessing import OneHotEncoder,PowerTransformer,StandardScaler
@@ -21,38 +21,17 @@ import pickle
 
 warnings.filterwarnings('ignore')
 
-property_types = ['single_family_residential','condo','townhouse']
+# load preprocessed data
+df = load_data()
+print('df.shape: ',df.shape)
 
-df = pd.DataFrame([])
-for property_type in property_types:
-    df_temp = pd.read_csv('./data/raw_joined/' + 'Boston_%s_joined_dataframe.csv'%property_type,index_col=0)
-    df_temp['PROPERTY TYPE'] = property_type
-    df = pd.concat([df,df_temp])
-
-df = df.sort_values('LIST DATE')
-
-df['DAYS ON MKT'] = df['DAYS ON MKT'].apply(lambda x: x if x > 0 else np.nan)
-df['PREMIUM'] = (df['SOLD PRICE'] - df['LIST PRICE'])/df['LIST PRICE']
-df['PREMIUM'] = df['PREMIUM'].apply(lambda x: x if np.abs(x) < 2 else np.nan)
-df['LIST MONTH'] = pd.to_datetime(df['LIST DATE']).apply(lambda x: x.month)
-df = df.dropna()
-
-print(df.shape)
-
-df.pop('LIST DATE')
-df.pop('SOLD DATE')
-df.pop('HOA/MONTH')
-
-df['HAS LOT'] = df['LOT SIZE'].apply(lambda x: 1 if x > 0 else 0)
-
+# pop out potential targets and unnecessary features.
 price_per_sqft = df.pop('$/SQUARE FEET')
 list_price = df.pop('LIST PRICE').values
 days_on_mkt = df.pop('DAYS ON MKT').values
 sold_price = df.pop('SOLD PRICE').values
 premium = df.pop('PREMIUM')
 premium_sign = np.sign(premium)
-
-
 
 ######################
 # PREDICT SOLD PRICE #
@@ -61,9 +40,8 @@ premium_sign = np.sign(premium)
 Y = sold_price
 Y = np.log10(Y)
 features = df.columns.tolist()
-print(features)
+print('features: ',features)
 X = df.values
-print(X[0])
 
 numerical_features = ['SQUARE FEET','YEAR BUILT','EST $/SQUARE FEET'] # require BoxCox transformation
 text_features = ['REMARKS'] # require vectorization
@@ -73,7 +51,7 @@ numerical_columns = [features.index(x) for x in numerical_features]
 text_columns = [features.index(x) for x in text_features]
 categorical_columns = [features.index(x) for x in categorical_features]
 
-
+# Setting up the ML pipeline
 p_num = Pipeline([('BoxCox',PowerTransformer(method='box-cox'))])
 p_cat = Pipeline([('OneHot',OneHotEncoder(handle_unknown='ignore',sparse=False))])
 p_text = Pipeline([('TFIDF',TfidfVectorizer()),
@@ -110,21 +88,13 @@ tscv = TimeSeriesSplit(n_splits=5)
 regr = GridSearchCV(p_tot,param_grid=params,cv=tscv,scoring='r2')
 
 Xtrain,Xtest,Ytrain,Ytest = train_test_split(X,Y,test_size=0.25,shuffle=False)
-
-print(Xtrain.shape)
-print(Xtrain[0])
-print(Xtest.shape)
-print(Xtest[0])
-
 regr.fit(Xtrain,Ytrain)
 
-print(regr.best_params_)
-print(regr.best_score_)
-
+print('best params: ',regr.best_params_)
+print('best score: ',regr.best_score_)
 
 with open('./pickled_models/RF_all_property_sold_price.pkl', 'wb') as f:
     pickle.dump(regr, f)
-
 
 Ypred = regr.predict(Xtest)
 
@@ -134,6 +104,3 @@ mre = np.mean(np.abs(10**Ytest - 10**Ypred)/10**Ytest)
 print('MRE: ',mre)
 
 
-#plt.scatter(Ytest,Ypred)
-#plt.plot(Ytest,Ytest,'k--')
-#plt.show()
