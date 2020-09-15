@@ -9,8 +9,7 @@ Similar to the previous project `time2sell`, I obtained real estate data from `w
 ## Feature engineering
 All the scripts for feature engineering can be found in `./feature_engineering`. For each house, I computed the number of point of interests within its 500m radius. `GetPOI.py` computed the feature array for a single point of interest (e.g. convenience store) and `MakePOI.py` combined the feature array of all point of interests into a feature matrix. For the brokers' remarks, I first preprocessed the text (removing stop words, lementizing, stemming, tokenizing). I then vectorize the words using tf-idf and find the latent dimension by using truncated-SVD. The number of components used in tSVD will be optimized using cross validation. Finally, I one-hot encoding all categorical features. Note that all feature engineering is done as part of the pipeline and also I use forward chaining cross validation to make sure I am not cheat by looking into the future.
 
-![Image of the pipeline]
-(https://github.com/jackpck/Boston_housing/blob/master/screenshots/pipeline.jpeg)
+![Image of the pipeline](https://github.com/jackpck/Boston_housing/blob/master/screenshots/pipeline.jpeg)
 
 ## Prediction
 From my previous project `time2sell`, I have concluded that it was very difficult to predict the days on market (time between actual selling and listing) of the property. Therefore in this project I will just focused on predicting the selling price using extra and more interesting datasets. The forward chaining cross validation pipeline I built selected the best machine that yields the highest r2 score. In this case, the CV process chose Random Forest.  I used mean relative error (MRE) as the metric due to its interpretability (e.g. the prediction on average is different than the true value by 20%). The regression is done in `main_regr_pipeline.py`.
@@ -20,5 +19,4 @@ I encourage the reader to take a look at the notebooks in `./notebook` as they s
 
 ## Web app
 I have also created a web app `server.py` which allows user to estimate the house price based on the specifics of the house, the address and a brief remark of the house.
-![Image of webapp frontpage]
-(https://github.com/jackpck/Boston_housing/blob/master/screenshots/webapp_frontpage.png)
+![Image of webapp frontpage](https://github.com/jackpck/Boston_housing/blob/master/screenshots/webapp_frontpage.png)
